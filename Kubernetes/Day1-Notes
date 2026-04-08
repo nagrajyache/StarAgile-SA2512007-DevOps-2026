@@ -1,0 +1,104 @@
+SetUp kubernetes 
+======================================
+Use AWS or GCP and we will create Ubuntu servers of 4 GB RAM 2 CPU core → t2.medium
+
+
+
+In GCP
+
+
+Connect to master and execute below commands:
+
+Steps on MASTER NODE:
+============================================
+# sudo su -
+
+## Install Containerd
+
+sudo wget https://raw.githubusercontent.com/lerndevops/labs/master/scripts/installContainerd.sh -P /tmp
+sudo bash /tmp/installContainerd.sh
+sudo systemctl restart containerd.service
+
+
+### Install kubeadm,kubelet,kubectl
+
+You will install these packages on all of your machines:
+kubeadm: the command to bootstrap the cluster.
+kubelet: the component that runs on all of the machines in your cluster and does things like starting pods and containers.
+kubectl: the command line util to talk to your cluster.
+
+
+sudo wget https://raw.githubusercontent.com/lerndevops/labs/master/scripts/installK8S.sh -P /tmp
+
+sudo bash /tmp/installK8S.sh
+
+## Initialize kubernetes Master Node
+
+   # sudo kubeadm init --ignore-preflight-errors=all
+
+Execute the below commands to setup kubectl and apiserver communication
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+   ## install networking driver -- Weave/flannel/canal/calico etc...
+
+   ## below installs calico networking driver
+
+   kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml
+
+   # Validate:  kubectl get nodes
+
+
+Just for your information:
+
+
+
+=========================================
+
+
+
+Steps on  worker Nodes:
+=====================================
+Create an Ubuntu server:
+ instance type t2.medium(AWS), e2 medium(GCP)
+OS : ubuntu 22 (AWS & GCP)
+
+
+
+
+
+
+
+
+
+
+
+
+
+On All Worker Nodes
+
+
+## Install Containerd
+# sudo su -
+sudo wget https://raw.githubusercontent.com/lerndevops/labs/master/scripts/installContainerd.sh -P /tmp
+sudo bash /tmp/installContainerd.sh
+sudo systemctl restart containerd.service
+
+## Install kubeadm,kubelet,kubectl
+
+sudo wget https://raw.githubusercontent.com/lerndevops/labs/master/scripts/installK8S.sh -P /tmp
+sudo bash /tmp/installK8S.sh
+
+## Run Below on Master Node to get join token
+
+#  kubeadm token create --print-join-command
+
+    copy the kubeadm join token from master & run it on all worker nodes
+
+On Master node:
+
+# kubectl get nodes
+==================================
