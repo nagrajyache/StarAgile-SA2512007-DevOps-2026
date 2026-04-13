@@ -6,5 +6,159 @@ Service object
  - ClusterIP
  - Node Port
  - Load Balancer
-Deployment
- - replicaSet
+
+Services:
+Service Object
+===================================================
+ClusterIP
+NodePort
+LoadBalancer
+
+
+Services in Kubernetes:
+
+
+Service: 
+================
+> It is also a resource in Kubernetes
+> Allows communication between pods within the cluster or outside the cluster
+> exposes the application of the pod to be accessed by a another Pod in the Cluster.
+> Exposes the application of the pod to be accessed by an external User outside the Cluster.
+
+Why do we need a Service resource in Kubernetes?
+
+Problems:
+=======================
+> Pods should not communicate via the pod Ip address as the pod is recreated the pod Ip changes 
+
+> Pod Could not resolve by its name -> you cannot communicate to the pod via its name
+
+> You cannot access the pod outside the cluster -> using its PODIP or using the serviceIP 
+
+Service resource in Kubernetes will help you overcome the Problems
+=================================
+Service object exposes the application of 1 pod to another pod for communication
+
+3 types of service:
+
+ClusterIP 
+
+It is a service that is created when we want 2 pods to communicate within the cluster
+
+====================================
+
+Create Pod - nginx
+
+# vim nginx-pod.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+ name: pod1
+ labels:
+  app: webserver
+spec:
+ containers:
+  - name: c1
+    image: nginx
+
+===================================
+
+# vim test-pod.yml
+
+kind: Pod
+apiVersion: v1
+metadata:
+ name: test-pod
+spec:
+ containers:
+  - name: c1
+    image: ubuntu
+    command: ["bash", "-c", "sleep 6000"]
+
+
+
+==================================
+# vim service.yml
+
+apiVersion: v1
+kind: Service
+metadata: 
+ name: mysvc
+spec:
+ type: ClusterIP
+ selector:
+  app: webserver  
+ ports:
+ - targetPort: 80 
+   port: 80  
+
+
+# kubeclt create -f pod-defintion.yml
+# kubectl create -f test-pod.yml
+# kubectl create -f service.yml
+# kubectl get svc
+
+# kubectl get endpoints
+
+# kubectl exec -it test-pod -- bash
+
+In the pod install curl
+
+# apt-get update && apt-get install curl -y
+
+# curl mysvc
+
+=======================================================
+
+Node Port
+=============================================
+Using this we can access the pod from outside the cluster i.e. from our browser.
+
+By default:
+ We cannot access pod ipaddress outside the cluster
+ We cannot access the ClusterIP address outside the cluster
+
+So we have to expose the cluster to the outside world.
+
+For this we will create a Service of type NodePort.
+
+A node port is  a new port mapping which is done to the service port
+
+The node port range is 30000 to 32767
+
+Nodeport will be a port number that will be open on every node of the cluster.
+
+apiVersion: v1
+kind: Service
+metadata: 
+ name: mysvc1 
+spec:
+ type: NodePort
+ selector:
+  app: webserver  
+ ports:
+ - targetPort: 80  
+   port: 80  
+
+
+LOAD BALANCER
+================================
+
+apiVersion: v1
+kind: Service
+metadata: 
+ name: mysvc
+spec:
+ type: LoadBalancer
+ selector:
+  app: webserver  
+ ports:
+ - targetPort: 80  
+   port: 80  
+
+
+
+# kubectl create -f service-lb.yml
+
+
